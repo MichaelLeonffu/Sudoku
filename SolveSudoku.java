@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ItemListener;
+import java.awt.GridBagConstraints;
 
 import java.util.concurrent.TimeUnit;
 import java.util.Scanner;
@@ -124,12 +125,14 @@ public class SolveSudoku{
 				{0,0,7, 0,0,0, 3,0,0}
 			};
 
-		System.out.println(SudokuNotes.viewSudokuMap(SudokuNotes.generateProbabilityMapFromInitalSudoku(matrix)));
-		System.out.println("Ready?");
+		// System.out.println(SudokuNotes.viewSudokuMap(SudokuNotes.generateProbabilityMapFromInitalSudoku(matrix)));
+		// System.out.println("Ready?");
 
-		new Scanner(System.in).nextLine();
+		// new Scanner(System.in).nextLine();
 
-		SudokuNotes.solveAndPrint(matrix);
+		// SudokuNotes.solveAndPrint(matrix);
+
+		new SudokuInterface();
 
 	}
 
@@ -143,7 +146,7 @@ public class SolveSudoku{
 		}
 
 		//prints the given puzzle then solves it using solve recursion then prints the solution
-		public static void solveAndPrint(int[][] initalSudoku){
+		public static boolean[][][] solveAndPrint(int[][] initalSudoku){
 			SudokuNotes mySudokuPuzzle = new SudokuNotes(initalSudoku);
 
 			//print init
@@ -154,6 +157,8 @@ public class SolveSudoku{
 
 			//print final
 			System.out.println(SudokuNotes.viewSudokuMap(mySudokuPuzzle.sudokuMap));
+
+			return mySudokuPuzzle.sudokuMap;
 		}
 
 		//solves the puzzle using recursion; returns true if it worked and false otherwise
@@ -404,5 +409,80 @@ public class SolveSudoku{
 
 	public static class SudokuInterface extends JFrame{
 
+		public static final int WINDOW_HEIGHT = 600;
+		public static final int WINDOW_WIDTH = 600;
+
+		public JTextField[][] sudokuFieldArray;
+
+		//placing all items in here since it's a JFrame
+		public SudokuInterface(){
+			//setting the title
+			super("Sudoku");
+
+			//misc
+			setSize(SudokuInterface.WINDOW_WIDTH, SudokuInterface.WINDOW_HEIGHT);
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+			//where sudoku takes place
+			JPanel sudokuField = new JPanel(new GridLayout(9,9));
+
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+
+			sudokuFieldArray = new JTextField[9][9];
+
+			for(int i = 0; i < 9; i++)
+				for(int j = 0; j < 9; j++){
+					JTextField aTextField = new JTextField(1);
+					sudokuField.add(aTextField, gbc);
+					sudokuFieldArray[i][j] = aTextField;
+				}
+
+			JPanel controlPannel = new JPanel();
+
+			JButton solveButton = new JButton("Solve");
+			JButton clearButton = new JButton("Clear");
+
+			solveButton.addActionListener(e -> {
+				int[][] matrix = new int[9][9];
+
+				for(int i = 0; i < 9; i++)
+					for(int j = 0; j < 9; j++)
+						try{
+							matrix[i][j] = Integer.parseInt(sudokuFieldArray[i][j].getText());
+						}catch(Exception error){
+							System.out.println("error");
+							matrix[i][j] = 0;
+						}
+
+				boolean[][][] sudokuSolved = SudokuNotes.solveAndPrint(matrix);
+
+				for(int i = 0; i < 9; i++)
+					for(int j = 0; j < 9; j++)
+						for(int k = 0; k < 9; k++)
+							if(sudokuSolved[i][j][k])
+								sudokuFieldArray[i][j].setText(Integer.toString(k+1));
+			});
+
+			clearButton.addActionListener(e -> {
+				for(int i = 0; i < 9; i++)
+					for(int j = 0; j < 9; j++)
+						sudokuFieldArray[i][j].setText("");
+			});
+
+			controlPannel.add(solveButton);
+			controlPannel.add(clearButton);
+
+			add(sudokuField, BorderLayout.CENTER);
+			add(controlPannel, BorderLayout.SOUTH);
+
+			pack();
+            // setLocationRelativeTo(null);
+
+			//allows user to see the GUI
+			setVisible(true);
+
+		}
 	}
 }
